@@ -1,0 +1,192 @@
+
+tar xvf jpegsrc.v7.tar.gz
+tar xvf libminigui-3.0.12-linux.tar.gz
+tar xvf libpng-1.2.44.tar.gz
+tar xvf mg-samples-3.0.12.tar.gz
+tar xvf minigui-res-be-3.0.12.tar.gz
+tar xvf tslib-1.0.tar.bz2
+tar xvf zlib-1.2.8.tar.gz
+tar xvf freetype-2.3.9-fm20100818.tar.gz
+tar xvf qvfb2-2.0.tar.gz
+
+
+
+cd /home/shawn/openwrt/minigui/out_test
+rm -rf all
+
+
+cd jpeg-7
+export PATH="$PATH:/home/shawn/openwrt/staging_dir/toolchain-mipsel_24kec+dsp_gcc-4.8-linaro_uClibc-0.9.33.2/bin"
+./configure \
+    --host=mipsel-linux \
+    --prefix=/home/shawn/openwrt/minigui/out_test   \
+    CC=mipsel-openwrt-linux-gcc
+make clean
+make
+make install
+cd -
+readelf -h  /home/shawn/openwrt/minigui/out_test/bin/libjpeg.so          | grep "Machine:"
+
+
+
+cd zlib-1.2.8
+export PATH="$PATH:/home/shawn/openwrt/staging_dir/toolchain-mipsel_24kec+dsp_gcc-4.8-linaro_uClibc-0.9.33.2/bin"
+export CC=mipsel-openwrt-linux-gcc
+./configure \
+	--shared \
+    --prefix=/home/shawn/openwrt/minigui/out_test
+make clean
+make
+make install
+cd -
+readelf -h  /home/shawn/openwrt/minigui/out_test/lib/libz.so           | grep "Machine:"
+
+
+
+cd libpng-1.2.44
+export PATH="$PATH:/home/shawn/openwrt/staging_dir/toolchain-mipsel_24kec+dsp_gcc-4.8-linaro_uClibc-0.9.33.2/bin"
+./configure \
+    --host=mipsel-linux \
+    --prefix=/home/shawn/openwrt/minigui/out_test \
+	LIBS=-L/home/shawn/openwrt/minigui/out_test/lib \
+	CPPFLAGS=-I/home/shawn/openwrt/minigui/out_test/include \
+	CC=mipsel-openwrt-linux-gcc
+make clean
+make
+make install
+cd -
+readelf -h  /home/shawn/openwrt/minigui/out_test/lib/libpng.so         | grep "Machine:"
+
+
+
+cd tslib-1.0
+export PATH="$PATH:/home/shawn/openwrt/staging_dir/toolchain-mipsel_24kec+dsp_gcc-4.8-linaro_uClibc-0.9.33.2/bin"
+echo  "ac_cv_func_malloc_0_nonnull=yes"  > tmp.cache
+./autogen.sh
+./configure \
+	--host=mipsel-linux  \
+	CC=mipsel-openwrt-linux-gcc \
+	--cache-file=tmp.cache \
+	--prefix=/home/shawn/openwrt/minigui/out_test
+make clean
+make
+make install
+cd  -
+readelf -h  /home/shawn/openwrt/minigui/out_test/lib/libts.so          | grep "Machine:"
+
+
+
+cd libminigui-3.0.12-linux
+#因为在开发板的显示是基于framebuffer，所以配置--disable-videoqvfb --disable-pcxvfb --enable-videofbcon
+export PATH="$PATH:/home/shawn/openwrt/staging_dir/toolchain-mipsel_24kec+dsp_gcc-4.8-linaro_uClibc-0.9.33.2/bin"
+./configure \
+   --prefix=/home/shawn/openwrt/minigui/out_test  \
+	--host=mipsel-linux \
+	--target=mipsel-linux \
+	--disable-videoqvfb \
+	--disable-pcxvfb \
+	--enable-videofbcon \
+	CC=mipsel-openwrt-linux-gcc	 \
+	CXX=mipsel-openwrt-linux-g++ \
+	--enable-tslibial \
+	CFLAGS=-I/home/shawn/openwrt/staging_dir/toolchain-mipsel_24kec+dsp_gcc-4.8-linaro_uClibc-0.9.33.2/include \
+	LDFLAGS=-L/home/shawn/openwrt/staging_dir/toolchain-mipsel_24kec+dsp_gcc-4.8-linaro_uClibc-0.9.33.2/lib
+
+make clean
+make -j4
+make install
+cd -
+readelf -h  /home/shawn/openwrt/minigui/out_test/lib/libminigui_ths.so | grep "Machine:"
+
+##报错：Going to generate license pictures ...
+##./configure: line 15530: ./runme.sh: No such file or directory
+##WARNING: failed to generate license pictures.
+##(无视之)
+#./configure \
+#    --prefix=/home/shawn/openwrt/minigui/out_test  \
+#	--host=mipsel-linux \
+#	--enable-static \
+#	--disable-screensaver\
+#	--disable-splash\
+#	--disable-jpgsupport    \
+#	--enable-videoqvfb=no\
+#	--enable-rtosxvfb=no \
+#	--enable-pcxvfb=no \
+#	--with-licensepicture=minigui
+ 
+
+
+
+
+cd minigui-res-be-3.0.12
+export PATH="$PATH:/home/shawn/openwrt/staging_dir/toolchain-mipsel_24kec+dsp_gcc-4.8-linaro_uClibc-0.9.33.2/bin"
+./configure \
+	--host=mipsel-linux \
+	--target=mipsel-linux \
+	CC=mipsel-openwrt-linux-gcc	 \
+	CXX=mipsel-openwrt-linux-g++ \
+	--prefix=/home/shawn/openwrt/minigui/out_test
+make clean
+make
+make install
+cd -
+
+
+ 
+ 
+readelf -h  /home/shawn/openwrt/minigui/out_test/lib/libpng.so         | grep "Machine:"
+readelf -h  /home/shawn/openwrt/minigui/out_test/lib/libts.so          | grep "Machine:"
+readelf -h  /home/shawn/openwrt/minigui/out_test/lib/libminigui_ths.so | grep "Machine:"
+readelf -h  /home/shawn/openwrt/minigui/out_test/bin/jpegtran          | grep "Machine:"
+readelf -h  /home/shawn/openwrt/minigui/out_test/lib/libz.so           | grep "Machine:"
+ 
+
+
+cd mg-samples-3.0.12/
+export PATH="$PATH:/home/shawn/openwrt/staging_dir/toolchain-mipsel_24kec+dsp_gcc-4.8-linaro_uClibc-0.9.33.2/bin"
+
+vim configure +2532
+#	for ac_option in --version -v -V -qversion; do
+	for ac_option in --version -v; do
+
+vim ./ctrl_dlg/dlgdemo.c +40
+//#include <mgplus/mgplus.h>
+
+./configure \
+	--prefix=/home/shawn/openwrt/minigui/out_test \
+	PKG_CONFIG_PATH=/home/shawn/openwrt/minigui/out_test/lib/pkgconfig \
+	--host=mipsel-linux \
+	--target=mipsel-linux \
+	CC=mipsel-openwrt-linux-gcc	 \
+	CXX=mipsel-openwrt-linux-g++ \
+	MINIGUI_LIBS="-L/home/shawn/openwrt/minigui/out_test/lib -lminigui_ths" \
+	CFLAGS="-I/home/shawn/openwrt/staging_dir/toolchain-mipsel_24kec+dsp_gcc-4.8-linaro_uClibc-0.9.33.2/include  -I/home/shawn/openwrt/minigui/out_test/include" \
+	CPPFLAGS="-I/home/shawn/openwrt/staging_dir/toolchain-mipsel_24kec+dsp_gcc-4.8-linaro_uClibc-0.9.33.2/include  -I/home/shawn/openwrt/minigui/out_test/include" \
+	LDFLAGS="-L/home/shawn/openwrt/staging_dir/toolchain-mipsel_24kec+dsp_gcc-4.8-linaro_uClibc-0.9.33.2/lib       -L/home/shawn/openwrt/minigui/out_test/lib -lminigui_ths -lpthread -ldl -lts -lpng -ljpeg -lz -lm"
+
+
+make clean
+make
+make install
+
+-–with-lang=zhcn \
+MINIGUI_CFLAGS="-I/home/shawn/openwrt/minigui/out_test/include  -L/home/shawn/openwrt/minigui/out_test/lib" \
+
+
+
+
+
+cd freetype-2.3.9-fm20100818
+./configure \
+	CC=mipsel-openwrt-linux-gcc \
+	--host=mipsel-linux \
+	--prefix=/home/shawn/openwrt/minigui/out_test
+#	--enable-static
+make clean
+make
+make install
+
+
+
+
+
