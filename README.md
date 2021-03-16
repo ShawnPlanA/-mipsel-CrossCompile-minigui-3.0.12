@@ -1,0 +1,1 @@
+# -mipsel-CrossCompile-minigui-3.0.12
